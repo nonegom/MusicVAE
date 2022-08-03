@@ -7,7 +7,7 @@
 - 속성 벡터 또는 잠재 제약 모델을 통해 기존 시퀀스 조작을 포함한 다양한 대화형 음악 창작 모드 제공
   
 
-MusicVAE는 [A Hierarchical Latent Vector Model for Learning Long-Term Structure in Music](https://arxiv.org/abs/1803.05428) 논문을 활용한 모델입니다. 이전까지는 Auto Encoder가 순차적 데이터를 모델링하는 방법으로 덜 사용되었었는데, 일반적으로 악보와 같은 이산 토큰 시퀀스는 autoregressive 디코더를 사용해야 했습니다. 이는 부분적으로 autoregression이 때로 충분히 강력해서 AutoEncoder가 latent code를 무시하는 경우가 발생헀기 때문이었습니다. (짧은 시퀀스에서 일부 성공을 보였지만, deep latent variable 모델은 아직 매우 긴 시퀀스에 성공적인 결과를 보여주지는 못했습니다.) 따라서 해당 논문은 hierarchical recurrent decoder를 갖춘 novel sequential autoen-coder를 도입하여, 순환 VAE로 long-term 구조를 모델링함으로 앞서 언급한 문제를 극복하고자 하는 방법을 제시했습니다.  
+MusicVAE는 [A Hierarchical Latent Vector Model for Learning Long-Term Structure in Music](https://arxiv.org/abs/1803.05428) 논문을 활용한 모델입니다. 이전까지는 Auto Encoder가 순차적 데이터를 모델링하는 방법으로 덜 사용되었었는데, 일반적으로 악보와 같은 이산 토큰 시퀀스는 autoregressive 디코더를 사용해야 했습니다. 이는 부분적으로 autoregression이 때로 충분히 강력해서 AutoEncoder가 latent code를 무시하는 경우가 발생헀기 때문이었습니다. (짧은 시퀀스에서 일부 성공을 보였지만, deep latent variable 모델은 아직 매우 긴 시퀀스에 성공적인 결과를 보여주지는 못했습니다.) 따라서 해당 논문은 hierarchical recurrent decoder를 갖춘 novel sequential autoencoder를 도입하여, recurrent VAE로 long-term 구조를 모델링함으로 앞서 언급한 문제를 극복하고자 하는 방법을 제시했습니다.  
 
 우선, 짧은 시퀀스(예: 2-bar "루프")의 경우 양방향 LSTM 인코더와 LSTM 디코더를 사용합니다. 긴 시퀀스를 위해 새로운 Hierarchical LSTM을 사용하는데 이는 모델이 장기적인 구조를 학습하는데 도움을 주기 위해서입니다. 또한 Hierarchical 디코더의 최저 수준 임베딩에 대한 여러 디코더를 훈련시켜 기기 간의 상호 의존성을 모델링한다고 합니다.
 
