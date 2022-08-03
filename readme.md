@@ -13,7 +13,7 @@ MusicVAE는 [A Hierarchical Latent Vector Model for Learning Long-Term Structure
 
 ## 1. 환경 세팅
 ※ Colab에 SSH연결을 수행해서 작업을 했습니다.  
-MusicVAE를 활용하기 위해 환경설징이 필요합니다. `pip install magenta`를 통해 Magenate 라이브러리 설치를 수행합니다.
+MusicVAE를 활용하기 위해 환경설정이 필요합니다. `pip install magenta`를 통해 Magenate 라이브러리 설치를 수행합니다.
 
 ```
 pip install magenta
