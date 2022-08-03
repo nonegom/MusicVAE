@@ -122,7 +122,7 @@ music_vae_train \
 # Pretrained 모델 다운로드 (groovae_4bar)
 wget https://storage.googleapis.com/magentadata/models/music_vae/checkpoints/groovae_4bar.tar
 ```
-Pretrained 모델(혹은 위에서 Train한 모델)이 준비됐다면 다음과 같은 스크립트를 통해서 드럼 비트를 생성해날 수 있습니다. (num_outputs를 통해 sample의 개수를 조절할 수 있습니다) 
+Pretrained 모델(혹은 위에서 Train한 모델)이 준비됐다면 다음과 같은 스크립트를 통해서 드럼 비트를 생성해낼 수 있습니다. (num_outputs를 통해 sample의 개수를 조절할 수 있습니다) 
 ```
 music_vae_generate \
 --config=groovae_4bar \
@@ -152,7 +152,7 @@ music_vae_generate \
 [groovae_4bar_sample](https://drive.google.com/drive/folders/1rHt6qzFX56tMSXflXk1s7StzkjoAPhO0?usp=sharing)
 
 #### Custom-model sample
-[groove_custom_model](https://drive.google.com/file/d/12bzx8Q_-kJj-isiiOscNlcKfNDPqD2_B/view?usp=sharing)
+[groove_custom_model](https://drive.google.com/file/d/12bzx8Q_-kJj-isiiOscNlcKfNDPqD2_B/view?usp=sharing) / 
 [groove_custom_sample](https://drive.google.com/drive/folders/1IKjPXCtHT6jTNyyIDeNQcWewAu94NbUY?usp=sharing)
 
 다른 2개의 모델을 만들었기에, 기존 pre-trained 모델과 새로 학습한 모델을 비교해볼 수 있었습니다. 우선, 기존 pre-trained모델의 성능이 더 좋았습니다. 새로 학습한 생성한 모델의 경우 기존 pre-trained 모델보다 데이터나, 학습 시간이 충분하지 않았었기 때문에 당연하다고 생각합니다. 그보다 sample을 들어보면, custom sample의 경우 드럼의 패턴이나 소리가 기본적이고 단조로운(스네어와 하이햇 위주) 반면, pretrained sample의 경우 패턴이나 소리가 좀 더 기교있고 다채롭습니다(하이햇 뿐만 아니라 톰톰 등도 포함). 이는 기존 학습했던 데이터의 특성이 반영되었기 때문이라고 생각합니다. custom-model에 사용한 midi데이터의 경우 총 용량이 3MB밖에 되지 않는 데이터이기 때문에 더 다양한 패턴과 소리를 충분히 학습하지 못했을 가능성이 있습니다. 
