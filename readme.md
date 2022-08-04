@@ -7,9 +7,9 @@
 - 속성 벡터 또는 잠재 제약 모델을 통해 기존 시퀀스 조작을 포함한 다양한 대화형 음악 창작 모드 제공
   
 
-MusicVAE는 [A Hierarchical Latent Vector Model for Learning Long-Term Structure in Music](https://arxiv.org/abs/1803.05428) 논문을 활용한 모델입니다. 이전까지는 Auto Encoder가 순차적 데이터를 모델링하는 방법으로 덜 사용되었었는데, 일반적으로 악보와 같은 이산 토큰 시퀀스는 autoregressive 디코더를 사용해야 했습니다. 이는 부분적으로 autoregression이 때로 충분히 강력해서 AutoEncoder가 latent code를 무시하는 경우가 발생헀기 때문이었습니다. (짧은 시퀀스에서 일부 성공을 보였지만, deep latent variable 모델은 아직 매우 긴 시퀀스에 성공적인 결과를 보여주지는 못했습니다.) 따라서 해당 논문은 hierarchical recurrent decoder를 갖춘 novel sequential autoencoder를 도입하여, recurrent VAE로 long-term 구조를 모델링함으로 앞서 언급한 문제를 극복하고자 하는 방법을 제시했습니다.  
+MusicVAE는 [A Hierarchical Latent Vector Model for Learning Long-Term Structure in Music](https://arxiv.org/abs/1803.05428) 논문을 활용한 모델입니다. 이전까지는 Auto Encoder가 순차적 데이터를 모델링하는 방법으로 덜 사용되었습니다. 일반적으로 악보와 같은 이산 토큰 시퀀스는 Autoregressive 디코더를 사용해야 했는데, 때로 Autoregression이 부분적으로 충분히 강력해서 AutoEncoder가 latent code를 무시하는 경우가 발생했기 때문이었습니다. (짧은 시퀀스에서 일부 성공을 보였지만, deep latent variable 모델은 아직 매우 긴 시퀀스에 성공적인 결과를 보여주지는 못했습니다.) 따라서 해당 논문은 Hierarchical recurrent decoder를 갖춘 novel sequential autoencoder를 도입하여, Recurrent VAE로 long-term 구조를 모델링함으로 앞서 언급한 문제를 극복하고자 하는 방법을 제시했습니다. 
 
-우선, 짧은 시퀀스(예: 2-bar "루프")의 경우 양방향 LSTM 인코더와 LSTM 디코더를 사용합니다. 긴 시퀀스를 위해 새로운 Hierarchical LSTM을 사용하는데 이는 모델이 장기적인 구조를 학습하는데 도움을 주기 위해서입니다. 또한 Hierarchical 디코더의 최저 수준 임베딩에 대한 여러 디코더를 훈련시켜 기기 간의 상호 의존성을 모델링한다고 합니다.
+우선, 짧은 시퀀스(예: 2-bar "루프")의 경우 양방향 LSTM 인코더와 LSTM 디코더를 사용합니다. 긴 시퀀스를 위해 새로운 Hierarchical LSTM을 사용하는데 이는 모델이 장기적인 구조를 학습하는데 도움을 주기 위해서입니다. 또한 Hierarchical 디코더의 최저 수준 임베딩에 대한 여러 디코더를 훈련시켜 기기 간의 상호 의존성을 모델합니다.
 
 ## 1. 환경 세팅
 ※ Colab에 SSH연결을 수행해서 작업을 했습니다.  
@@ -47,7 +47,7 @@ CONFIG_MAP['groovae_4bar'] = Config(
     tfds_name='groove/4bar-midionly',
 )
 ```
-`groovae_4bar` config를 보면, 디코더로는 GrooveLSTMDecoder가 data_converter로는 GrooveConverter가 Grooveae만을 위한 모델로 사용되고 있습니다. 이는 드럼 비트를 받아들이기 위해 별도로 생성된 모델로 보입니다. 논문에 의하면 MusicVAE의 데이터로 2bar 및 16-bar Monophonic(하나의 채널로 연주)한 멜로디, 2bar 및16-bar 드럼 패턴, 16bar "트리오(멜로디, 베이스라인, 드럼 패턴의 개별 시퀀스)시퀀스" 를 사용합니다. 따라서 해당 데이터에 따라 사용하는 MIDI피치나 클래스가 다르기 때문에 모델별로 별도의 모델 구조가 필요한 것으로 보여집니다.
+`groovae_4bar` config를 보면, 디코더로는 GrooveLSTMDecoder가 data_converter로는 GrooveConverter가 Groovae만을 위한 모델로 사용되고 있습니다. 이는 드럼 비트를 받아들이기 위해 별도로 생성된 모델로 보입니다. 논문에 의하면 MusicVAE의 데이터로 2bar 및 16-bar Monophonic(하나의 채널로 연주)한 멜로디, 2bar 및16-bar 드럼 패턴, 16bar "트리오(멜로디, 베이스라인, 드럼 패턴의 개별 시퀀스)시퀀스" 를 사용합니다. 따라서 해당 데이터에 따라 사용하는 MIDI피치나 클래스가 다르기 때문에 모델별로 별도의 모델 구조가 필요한 것으로 보여집니다.
 
 실제 코드를 보면 다음과 같은 설명이 있음을 확인할 수 있습니다.
 ```py
@@ -90,7 +90,7 @@ music_vae_train \
 
 ### 2-2. Use Custom Dataset
 #### PreProcessing
-텐서플로우 데이터셋을 활용하지 않고 midi를 통해 학습할 수도 있습니다. 먼저 [데이터 세트 구축 지침](https://github.com/magenta/magenta/blob/main/magenta/scripts/README.md)에 따라 MIDI 파일 컬렉션을 노트 시퀀스의 TF 레코드로 변환하는 전처리 과정이 필요합니다. 
+텐서플로우 데이터셋을 활용하지 않고 MIDI를 통해 학습할 수도 있습니다. 먼저 [데이터 세트 구축 지침](https://github.com/magenta/magenta/blob/main/magenta/scripts/README.md)에 따라 MIDI 파일 컬렉션을 노트 시퀀스의 TF 레코드로 변환하는 전처리 과정이 필요합니다. 
 
 ```
 INPUT_DIRECTORY=/root/magenta/groove
@@ -105,7 +105,7 @@ convert_dir_to_note_sequences \
 커스텀 데이터셋으로 [Groove MIDI Dataset](https://magenta.tensorflow.org/datasets/groove#dataset)를 활용했습니다. 학습 시간을 위해 데이터의 일부만 포함한 [groove-v1.0.0-midionly](https://storage.googleapis.com/magentadata/datasets/groove/groove-v1.0.0-midionly.zip) 데이터를 활용하기로 했습니다. 데이터를 다운로드 받아 전처리를 수행합니다. 
 
 #### Training
-MIDI 파일을 TF record로 변환했다면, 다음과 같은 스크립트를 실행해서 사용자의 데이터셋으로도 학습을 진행할 수 있습니다.    
+MIDI 파일을 TF record로 변환했다면, 다음과 같은 스크립트를 실행해서 사용자의 데이터셋으로 학습을 진행할 수 있습니다.    
 ```
 music_vae_train \
 --config=groovae_4bar \
@@ -117,12 +117,12 @@ music_vae_train \
 ※ Training default global_step은 200000으로 설정되어 있으며, 1step당 3초가 소요되기 때문에 시간이 매우 오래 걸립니다. 따라서 간단히 코드를 구현하고 싶다면, step 수를 조절할 필요가 있습니다. 혹은 100 step별로 체크포인트가 저장되기에 도중에 멈추고, 체크포인트 파일을 이용할 수 있습니다.   
 
 ## 3. Generate Model
-모델 학습을 완료했다면(혹은 Pretrained 모델을 다운로드) 모델을 실행해볼 수 있습니다. 아래 스크립트는 빠른 모델 실행을 위해 Pretrained된 모델을 활용하기 위한 명령어입니다. `groovae_4bar`모델을 활용해 생성을 진행했습니다. (추후 개인 모델의 경우 `--checkpoint_file`의 경로 수정)
+모델 학습을 완료했다면(혹은 Pretrained 모델을 다운로드) 모델을 실행해볼 수 있습니다. 아래 스크립트는 빠른 모델 실행을 위해 Pretrained된 모델을 활용하기 위한 명령어입니다. `groovae_4bar`모델을 활용해 생성을 진행했습니다. 우선 magenta에서 제공하는 Pretrained 모델을 다운로드 합니다. 
 ```
 # Pretrained 모델 다운로드 (groovae_4bar)
 wget https://storage.googleapis.com/magentadata/models/music_vae/checkpoints/groovae_4bar.tar
 ```
-Pretrained 모델(혹은 위에서 Train한 모델)이 준비됐다면 다음과 같은 스크립트를 통해서 드럼 비트를 생성해낼 수 있습니다. (num_outputs를 통해 sample의 개수를 조절할 수 있습니다) 
+Pretrained 모델(혹은 위에서 Train한 모델)이 준비됐다면 다음과 같은 스크립트를 통해서 드럼 비트를 생성해낼 수 있습니다. 개인 모델의 경우 `--checkpoint_file`의 경로를 수정하면 됩니다. (num_outputs를 통해 sample의 개수를 조절할 수 있습니다)
 ```
 music_vae_generate \
 --config=groovae_4bar \
@@ -133,7 +133,7 @@ music_vae_generate \
 ```
 
 ## 4. Interpolate Model 
-생성된 midi파일을 통해서 Interpolate를 진행할 수 있습니다. Interpolate를 진행할 때는 `input_mid1`과 `input_mid2`개의 midi파일이 필요합니다. 또한, 유의해야할 점이 있는데 `input_mid1`과 `input_mid2`의 형식이 같아야 합니다. groove_4bar 모델의 경우 드럼으로만 구성된 4-bar 길이의 midi파일이 들어와야 한다는 의미입니다. 
+생성된 MIDI파일을 통해서 Interpolate를 진행할 수 있습니다. Interpolate를 진행할 때는 `input_mid1`과 `input_mid2`개의 MIDI파일이 필요합니다. 또한, 유의해야할 점이 있는데 `input_mid1`과 `input_mid2`의 형식이 같아야 합니다. groove_4bar 모델의 경우 드럼으로만 구성된 4-bar 길이의 MIDI파일이 들어와야 한다는 의미입니다. 
 ```
 music_vae_generate \
 --config=groovae_4bar \
@@ -145,8 +145,8 @@ music_vae_generate \
 --output_dir=/root/sample_interporate/
 ```
 
-## 5.Model Sample
-이번 과제의 경우 전처리, 학습, 생성 3가지 프로세스를 진행하게 됩니다. pre-trained모델만 활용하면 '전처리' 및 '학습'을 하지 않기 때문에, 이를 해보고자 총 2가지의 모델로 생성을 수행해봤습니다. 첫번째로, Pre-trained모델인 `groovae_4bar`을 활용해서 모델을 생성했고, 두번째로, `groove_midonly`데이터셋을 활용해 만든 `groove_custom`모델을 사용했습니다. (두번째 모델의 경우 loss=41인 모델로, 40000step의 체크포인트를 활용했습니다) 
+## 5. Conclusion
+이번 과제의 경우 전처리, 학습, 생성 3가지 프로세스를 진행했습니다. Pretrained모델만 활용하면 '전처리' 및 '학습'을 하지 않기 때문에, 이를 해보고자 총 2가지의 모델로 생성을 수행해봤습니다. 첫번째로, Pretrained모델인 `groovae_4bar`을 활용해서 모델을 생성했고, 두번째로, `groove_midonly`데이터셋을 활용해 만든 `groove_custom`모델을 사용했습니다. (두번째 모델의 경우 loss=41인 모델로, 40000step의 체크포인트를 활용했습니다. 200000 step을 돌기에는 Colab 작업 환경 특성상 런타임 초기화 등의 문제로 20%에 해당하는 step(40000 step)에서 EarlyStop 했습니다.) 
 
 #### Pretrained-model sample
 [groovae_4bar_sample](https://drive.google.com/drive/folders/1rHt6qzFX56tMSXflXk1s7StzkjoAPhO0?usp=sharing)
@@ -155,4 +155,4 @@ music_vae_generate \
 [groove_custom_model](https://drive.google.com/file/d/12bzx8Q_-kJj-isiiOscNlcKfNDPqD2_B/view?usp=sharing) / 
 [groove_custom_sample](https://drive.google.com/drive/folders/1IKjPXCtHT6jTNyyIDeNQcWewAu94NbUY?usp=sharing)
 
-다른 2개의 모델을 만들었기에, 기존 pre-trained 모델과 새로 학습한 모델을 비교해볼 수 있었습니다. 우선, 기존 pre-trained모델의 성능이 더 좋았습니다. 새로 학습한 생성한 모델의 경우 기존 pre-trained 모델보다 데이터나, 학습 시간이 충분하지 않았었기 때문에 당연하다고 생각합니다. 그보다 sample을 들어보면, custom sample의 경우 드럼의 패턴이나 소리가 기본적이고 단조로운(스네어와 하이햇 위주) 반면, pretrained sample의 경우 패턴이나 소리가 좀 더 기교있고 다채롭습니다(하이햇 뿐만 아니라 톰톰 등도 포함). 이는 기존 학습했던 데이터의 특성이 반영되었기 때문이라고 생각합니다. custom-model에 사용한 midi데이터의 경우 총 용량이 3MB밖에 되지 않는 데이터이기 때문에 더 다양한 패턴과 소리를 충분히 학습하지 못했을 가능성이 있습니다. 
+다른 2개의 모델을 만들었기에, 기존 Pretrained 모델과 새로 학습한 모델을 비교해볼 수 있었습니다. 우선, 당연히 기존 Pretrained모델의 성능이 더 좋았습니다. 새로 학습한 생성한 모델의 경우 기존 Pretrained 모델보다 데이터나, 학습 시간이 충분하지 않았었기 때문이라고 생각합니다. sample MIDI를 들어서 비교해보면, custom sample의 경우 드럼의 패턴이나 소리가 기본적이고 단조로운(스네어와 하이햇 위주) 반면, pretrained sample의 경우 패턴이나 소리가 좀 더 기교있고 다채롭습니다(하이햇 뿐만 아니라 톰톰 등도 포함). 이는 기존 학습했던 데이터의 특성이 반영되었기 때문이라고 생각합니다. custom-model에 사용한 MIDI 데이터의 경우 총 용량이 3MB밖에 되지 않는 데이터이기 때문에 더 다양한 패턴과 소리를 충분히 학습하지 못했을 가능성이 있습니다.  
